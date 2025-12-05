@@ -1,4 +1,4 @@
-import { Link, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
+import { Link, Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import './App.css';
 // Pages
 
@@ -14,9 +14,6 @@ const isAuthenticated = false
 
 function App() {
   return (
-    <>
-     {/*{isAuthenticated ?<Navigate to='/visitor'/> :<Navigate to='/login'/>}*/}
-    
       <Routes>
       {/* Visitor routes with layout */}
       <Route path="/visitor" element={<VisitorLayout />}>
@@ -26,16 +23,17 @@ function App() {
         <Route  path="About" element={<About />} />
       </Route>
 
-      {/* Login standalone */}
-      <Route path="/login" element={<Login />} />
-
-      {/* Admin routes with layout */}
-      <Route path="/admin" element={<AdminLayout />}>
+       {/* Admin routes with layout */}
+       <Route path="/admin" element={<AdminLayout />}>
         <Route path='dashboard' element={<AdminDashboard />} />
         <Route path="projects" element={<AdminProjects />} />
       </Route>
+
+      {/* Login standalone */}
+      <Route path="/login" element={<Login />} />
+
+      <Route path="*" element={isAuthenticated ? <Navigate to='/visitor' /> : <Navigate to='/login' />} />
     </Routes>
-    </>
   );
 }
 
