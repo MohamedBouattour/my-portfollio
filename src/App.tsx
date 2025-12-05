@@ -10,29 +10,36 @@ import About from './pages/visitor/About';
 import Contact from './pages/visitor/Contact';
 import Projects from './pages/visitor/Projects';
 
-const isAuthenticated = false
+const isAuthenticated = true
+const isAdmin = true
 
 function App() {
   return (
       <Routes>
       {/* Visitor routes with layout */}
       <Route path="/visitor" element={<VisitorLayout />}>
-        <Route  path="home" element={<Home />} />
+        <Route index path="" element={<Home />} />
+        <Route path="home" element={<Home />} />
         <Route  path="projects" element={<Projects />} />
         <Route  path="Contact" element={<Contact />} />
         <Route  path="About" element={<About />} />
       </Route>
 
        {/* Admin routes with layout */}
-       <Route path="/admin" element={<AdminLayout />}>
-        <Route path='dashboard' element={<AdminDashboard />} />
-        <Route path="projects" element={<AdminProjects />} />
+       {
+        isAdmin && 
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index path='' element={<AdminDashboard />} />
+          <Route path='dashboard' element={<AdminDashboard />} />
+          <Route path="projects" element={<AdminProjects />} />
       </Route>
+       }
+       
 
       {/* Login standalone */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<Login isAuthenticated={isAuthenticated} isAdmin={isAdmin} />} />
 
-      <Route path="*" element={isAuthenticated ? <Navigate to='/visitor' /> : <Navigate to='/login' />} />
+      <Route path="*" element={<Login isAuthenticated={isAuthenticated} isAdmin={isAdmin} />} />
     </Routes>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
-export default function Login() {
+export default function Login({isAuthenticated,isAdmin}:{isAuthenticated:boolean,isAdmin:boolean}) {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -18,7 +18,12 @@ export default function Login() {
 
   function handleSubmit(e: any) {
     e.preventDefault();
-    navigation('/admin')
+    if(isAdmin){
+      navigation('/admin')
+    }else {
+      navigation('/visitor')
+    }
+    
     if (
       formData.email === 'admin@example.com' &&
       formData.password === 'admin123'
@@ -27,6 +32,13 @@ export default function Login() {
     } else {
       setError('Invalid email or password');
     }
+  }
+
+  if(isAuthenticated){
+    if(isAdmin){
+      return <Navigate to='/admin' />
+    }
+    return <Navigate to='/visitor' />
   }
 
   return (
