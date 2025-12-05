@@ -1,128 +1,146 @@
+import { Link, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import './App.css';
-import { Routes, Route, Link, Outlet } from 'react-router-dom';
-import { useState } from 'react';
 // Pages
 
 import Home from './pages/Home';
-import Projects from './pages/Projects';
-import About from './pages/About';
-import Contact from './pages/Contact';
 import Login from './pages/Login';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProjects from './pages/admin/AdminProjects';
+import About from './pages/visitor/About';
+import Contact from './pages/visitor/Contact';
+import Projects from './pages/visitor/Projects';
+
+const isAuthenticated = false
 
 function App() {
-  const [isAdmin, setIsAdmin] = useState(false);
   return (
     <>
+     {/*{isAuthenticated ?<Navigate to='/visitor'/> :<Navigate to='/login'/>}*/}
+    
       <Routes>
-        {/* CLIENT ROUTES */}
-        <Route
-          path="/"
-          element={<ClientLayout isAdmin={isAdmin} setIsAdmin={setIsAdmin} />}
-        >
-          <Route index element={<Home />} />
-          <Route path="projects" element={<Projects />} />
-          <Route path="about" element={<About />} />
-          <Route path="contact" element={<Contact />} />
-        </Route>
+      {/* Visitor routes with layout */}
+      <Route path="/visitor" element={<VisitorLayout />}>
+        <Route  path="home" element={<Home />} />
+        <Route  path="projects" element={<Projects />} />
+        <Route  path="Contact" element={<Contact />} />
+        <Route  path="About" element={<About />} />
+      </Route>
 
-        {/* LOGIN */}
-        <Route
-          path="/login"
-          element={<Login isAdmin={isAdmin} setIsAdmin={setIsAdmin} />}
-        />
+      {/* Login standalone */}
+      <Route path="/login" element={<Login />} />
 
-        {/* ADMIN ROUTES */}
-        {isAdmin && (
-          <Route
-            path="/admin"
-            element={<AdminLayout isAdmin={isAdmin} setIsAdmin={setIsAdmin} />}
-          >
-            <Route index element={<AdminDashboard />} />
-            <Route path="projects" element={<AdminProjects />} />
-          </Route>
-        )}
-
-        {/* FALLBACK */}
-        <Route path="*" element={<Home />} />
-      </Routes>
+      {/* Admin routes with layout */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route path='dashboard' element={<AdminDashboard />} />
+        <Route path="projects" element={<AdminProjects />} />
+      </Route>
+    </Routes>
     </>
   );
 }
 
-function ClientLayout({ isAdmin }: any) {
+function VisitorLayout() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-white shadow-md p-4">
-        <nav className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-600">Portfolio</h1>
-          <div className="flex gap-8">
-            <Link to="/" className="text-gray-700 hover:text-blue-600">
-              Home
-            </Link>
-            <Link to="/projects" className="text-gray-700 hover:text-blue-600">
-              Projects
-            </Link>
-            <Link to="/about" className="text-gray-700 hover:text-blue-600">
-              About
-            </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-blue-600">
-              Contact
-            </Link>
-            {!isAdmin && (
-              <Link to="/login" className="text-blue-600 font-bold">
-                Admin
-              </Link>
-            )}
-          </div>
-        </nav>
-      </header>
+      <VisitorHeader />
       <main className="flex-1">
-        <Outlet />
+        <Outlet /> {/* Pages render here */}
       </main>
-      <footer className="bg-gray-900 text-white p-8 text-center">
-        <p>&copy; 2024 My Portfolio. All rights reserved.</p>
-      </footer>
+      <VisitorFooter />
     </div>
   );
 }
 
-function AdminLayout({ setIsAdmin }: any) {
+function VisitorHeader() {
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-64 bg-gray-900 text-white p-6">
-        <h2 className="text-2xl font-bold mb-8">Admin Panel</h2>
-        <nav className="space-y-4">
-          <Link to="/admin" className="block hover:bg-gray-800 p-2 rounded">
-            Dashboard
+    <header className="bg-white shadow-md p-4 sticky top-0 z-50">
+      <nav className="max-w-7xl mx-auto flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-blue-600">Portfolio</h1>
+        <div className="flex gap-8 items-center">
+          <Link to="/visitor/home" className="text-gray-700 hover:text-blue-600 font-medium">
+            Home
           </Link>
-          <Link
-            to="/admin/projects"
-            className="block hover:bg-gray-800 p-2 rounded"
-          >
+          <Link to="/visitor/projects" className="text-gray-700 hover:text-blue-600 font-medium">
             Projects
           </Link>
-        </nav>
-      </aside>
+          <Link to="/visitor/about" className="text-gray-700 hover:text-blue-600 font-medium">
+            About
+          </Link>
+          <Link to="/visitor/contact" className="text-gray-700 hover:text-blue-600 font-medium">
+            Contact
+          </Link>
+          <Link to="/login" className="text-blue-600 font-bold hover:underline">
+            Admin
+          </Link>
+        </div>
+      </nav>
+    </header>
+  );
+}
+
+function VisitorFooter() {
+  const year = new Date().getFullYear();
+  return (
+    <footer className="bg-gray-900 text-gray-300 p-8 text-center mt-16">
+      <p>&copy; {year} My Portfolio. All rights reserved.</p>
+    </footer>
+  );
+}
+
+// ============ ADMIN LAYOUT ============
+function AdminLayout() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate('/visitor/home');
+  };
+
+  return (
+    <div className="flex min-h-screen">
+      <AdminSidebar />
       <div className="flex-1 flex flex-col">
-        <header className="bg-white shadow-md p-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <button
-            onClick={() => {
-              setIsAdmin(false);
-              window.location.href = '/';
-            }}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-          >
-            Logout
-          </button>
-        </header>
-        <main className="flex-1 overflow-auto p-8">
-          <Outlet />
+        <AdminHeader onLogout={handleLogout} />
+        <main className="flex-1 overflow-auto p-8 bg-gray-50">
+          <Outlet /> {/* Admin pages render here */}
         </main>
       </div>
     </div>
+  );
+}
+
+function AdminSidebar() {
+  return (
+    <aside className="w-64 bg-gray-900 text-white p-6 min-h-screen">
+      <h2 className="text-2xl font-bold mb-8">Admin Panel</h2>
+      <nav className="space-y-4">
+        <Link
+          to="/admin/dashboard"
+          className="block hover:bg-gray-800 p-3 rounded-lg transition font-medium"
+        >
+          📊 Dashboard
+        </Link>
+        <Link
+          to="/admin/projects"
+          className="block hover:bg-gray-800 p-3 rounded-lg transition font-medium"
+        >
+          📁 Projects
+        </Link>
+      </nav>
+    </aside>
+  );
+}
+
+function AdminHeader({ onLogout }:any) {
+  return (
+    <header className="bg-white shadow-md p-6 flex justify-between items-center">
+      <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+      <button
+        onClick={onLogout}
+        className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 font-semibold"
+      >
+        Logout
+      </button>
+    </header>
   );
 }
 

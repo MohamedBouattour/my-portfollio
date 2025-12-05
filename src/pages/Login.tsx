@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function Login({ setIsAdmin }: any) {
+export default function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [error, setError] = useState('');
+  const navigation = useNavigate()
 
   function handleChange(e: any) {
     setFormData({
@@ -16,12 +18,11 @@ export default function Login({ setIsAdmin }: any) {
 
   function handleSubmit(e: any) {
     e.preventDefault();
-
+    navigation('/admin')
     if (
       formData.email === 'admin@example.com' &&
       formData.password === 'admin123'
     ) {
-      setIsAdmin(true);
       window.location.href = '/admin';
     } else {
       setError('Invalid email or password');
