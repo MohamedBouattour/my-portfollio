@@ -1,5 +1,5 @@
 import './App.css';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, Outlet } from 'react-router-dom';
 import { useState } from 'react';
 // Pages
 
@@ -79,7 +79,7 @@ function ClientLayout({ isAdmin }: any) {
         </nav>
       </header>
       <main className="flex-1">
-        <Home />
+        <Outlet />
       </main>
       <footer className="bg-gray-900 text-white p-8 text-center">
         <p>&copy; 2024 My Portfolio. All rights reserved.</p>
@@ -119,7 +119,7 @@ function AdminLayout({ setIsAdmin }: any) {
           </button>
         </header>
         <main className="flex-1 overflow-auto p-8">
-          <AdminDashboard />
+          <Outlet />
         </main>
       </div>
     </div>
