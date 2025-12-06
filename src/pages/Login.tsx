@@ -16,24 +16,36 @@ export default function Login({isAuthenticated,isAdmin}:{isAuthenticated:boolean
     });
   }
 
-  function handleSubmit(e: any) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if(isAdmin){
-      navigation('/admin')
-    }else {
-      navigation('/visitor')
-    }
-    
-    if (
-      formData.email === 'admin@example.com' &&
-      formData.password === 'admin123'
-    ) {
-      window.location.href = '/admin';
-    } else {
-      setError('Invalid email or password');
+  
+    try {
+      const res = await fetch('https://my-porfollio-backend.onrender.com/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+  
+      if (!res.ok) {
+        // Optionally parse error body
+        const errorBody = await res.text();
+        console.error('Request failed:', res.status, errorBody);
+        return;
+      }
+  
+      const data = await res.json();
+      console.log('Success:', data);
+    } catch (err) {
+      console.error('Network error:', err);
     }
   }
-
+  
   if(isAuthenticated){
     if(isAdmin){
       return <Navigate to='/admin' />
