@@ -40,6 +40,9 @@ export default function Login({isAuthenticated,isAdmin}:{isAuthenticated:boolean
       }
   
       const data = await res.json();
+
+      // Add redirection visitor / admin
+      // Signup Form
       console.log('Success:', data);
     } catch (err) {
       console.error('Network error:', err);

@@ -10,8 +10,8 @@ import About from './pages/visitor/About';
 import Contact from './pages/visitor/Contact';
 import Projects from './pages/visitor/Projects';
 
-const isAuthenticated = true
-const isAdmin = true
+const isAuthenticated = false
+const isAdmin = false
 
 function App() {
   return (
@@ -29,10 +29,11 @@ function App() {
        {
         isAdmin && 
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index path='' element={<AdminDashboard />} />
+          <Route index element={<AdminDashboard />} />
           <Route path='dashboard' element={<AdminDashboard />} />
           <Route path="projects" element={<AdminProjects />} />
-      </Route>
+          <Route path="*" element={<span>404 not found</span>} />
+        </Route>
        }
        
 
