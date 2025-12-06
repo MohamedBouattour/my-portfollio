@@ -1,4 +1,4 @@
-import { Link, Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
+import { Link, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import './App.css';
 // Pages
 
@@ -18,7 +18,7 @@ function App() {
       <Routes>
       {/* Visitor routes with layout */}
       <Route path="/visitor" element={<VisitorLayout />}>
-        <Route index path="" element={<Home />} />
+        <Route index element={<Home />} />
         <Route path="home" element={<Home />} />
         <Route  path="projects" element={<Projects />} />
         <Route  path="Contact" element={<Contact />} />
