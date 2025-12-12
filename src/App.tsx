@@ -10,8 +10,8 @@ import About from './pages/visitor/About';
 import Contact from './pages/visitor/Contact';
 import Projects from './pages/visitor/Projects';
 
-const isAuthenticated = false
-const isAdmin = false
+const isAuthenticated = true
+const isAdmin = true
 
 function App() {
   return (
