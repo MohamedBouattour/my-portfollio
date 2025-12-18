@@ -1,56 +1,76 @@
-import { Link, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
+import { Link, Outlet, Route, Routes, useNavigate, Navigate } from 'react-router-dom';
 import './App.css';
-// Pages
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute'; // Import du composant de protection
+import { useAuth } from './context/AuthContext';
 
+// Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProjects from './pages/admin/AdminProjects';
+import AdminProjectDetails from './pages/admin/AdminProjectDetails';
 import About from './pages/visitor/About';
 import Contact from './pages/visitor/Contact';
 import Projects from './pages/visitor/Projects';
 
-const isAuthenticated = true
-const isAdmin = true
-
 function App() {
   return (
-      <Routes>
-      {/* Visitor routes with layout */}
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+}
+
+// Séparer les routes dans un composant enfant pour pouvoir utiliser useAuth si besoin (optionnel ici mais propre)
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Route par défaut : redirection vers visiteur */}
+      <Route path="/" element={<NavigateWrapper to="/visitor/home" />} />
+
+      {/* Routes Visiteurs (publiques) */}
       <Route path="/visitor" element={<VisitorLayout />}>
         <Route index element={<Home />} />
         <Route path="home" element={<Home />} />
-        <Route  path="projects" element={<Projects />} />
-        <Route  path="Contact" element={<Contact />} />
-        <Route  path="About" element={<About />} />
+        <Route path="projects" element={<Projects />} />
+        <Route path="contact" element={<Contact />} />
+        <Route path="about" element={<About />} />
       </Route>
 
-       {/* Admin routes with layout */}
-       {
-        isAdmin && 
+      {/* Routes Admin (Protégées) */}
+      {/* Tout ce qui est dans ce Route parent passera par ProtectedRoute */}
+      <Route element={<ProtectedRoute requireAdmin={true} />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
-          <Route path='dashboard' element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="projects" element={<AdminProjects />} />
-          <Route path="*" element={<span>404 not found</span>} />
+          <Route path="projects/:id" element={<AdminProjectDetails />} />
         </Route>
-       }
-       
+      </Route>
 
-      {/* Login standalone */}
-      <Route path="/login" element={<Login isAuthenticated={isAuthenticated} isAdmin={isAdmin} />} />
+      {/* Login */}
+      <Route path="/login" element={<Login />} />
 
-      <Route path="*" element={<Login isAuthenticated={isAuthenticated} isAdmin={isAdmin} />} />
+      {/* Catch all : 404 */}
+      <Route path="*" element={<div className="text-center mt-10">404 - Page non trouvée</div>} />
     </Routes>
   );
 }
+
+// Petit helper pour la redirection racine
+// Petit helper pour la redirection racine
+function NavigateWrapper({ to }: { to: string }) {
+  return <Navigate to={to} replace />;
+}
+
 
 function VisitorLayout() {
   return (
     <div className="flex flex-col min-h-screen">
       <VisitorHeader />
       <main className="flex-1">
-        <Outlet /> {/* Pages render here */}
+        <Outlet /> {/* Les pages s'affichent ici */}
       </main>
       <VisitorFooter />
     </div>
@@ -58,6 +78,8 @@ function VisitorLayout() {
 }
 
 function VisitorHeader() {
+  const { user, logout } = useAuth(); // Exemple d'utilisation du hook dans le header
+
   return (
     <header className="bg-white shadow-md p-4 sticky top-0 z-50">
       <nav className="max-w-7xl mx-auto flex justify-between items-center">
@@ -75,9 +97,24 @@ function VisitorHeader() {
           <Link to="/visitor/contact" className="text-gray-700 hover:text-blue-600 font-medium">
             Contact
           </Link>
-          <Link to="/login" className="text-blue-600 font-bold hover:underline">
-            Admin
-          </Link>
+
+          {user ? (
+            // Si connecté, on affiche un bouton Logout ou lien vers Admin
+            <div className="flex gap-4 items-center">
+              {user.role === 'admin' && (
+                <Link to="/admin" className="text-blue-600 font-bold hover:underline">
+                  Admin Panel
+                </Link>
+              )}
+              <button onClick={logout} className="text-red-500 font-medium hover:underline">
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="text-blue-600 font-bold hover:underline">
+              Login
+            </Link>
+          )}
         </div>
       </nav>
     </header>
@@ -95,9 +132,11 @@ function VisitorFooter() {
 
 // ============ ADMIN LAYOUT ============
 function AdminLayout() {
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    logout();
     navigate('/visitor/home');
   };
 
@@ -131,15 +170,22 @@ function AdminSidebar() {
         >
           📁 Projects
         </Link>
+        <Link
+          to="/visitor/home"
+          className="block hover:bg-gray-800 p-3 rounded-lg transition font-medium text-gray-400 mt-10"
+        >
+          ← Retour site vitrine
+        </Link>
       </nav>
     </aside>
   );
 }
 
-function AdminHeader({ onLogout }:any) {
+function AdminHeader({ onLogout }: { onLogout: () => void }) {
+  const { user } = useAuth();
   return (
     <header className="bg-white shadow-md p-6 flex justify-between items-center">
-      <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Admin ({user?.email})</h1>
       <button
         onClick={onLogout}
         className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 font-semibold"

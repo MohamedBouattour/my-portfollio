@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const API_URL = 'https://my-porfollio-backend.onrender.com/api'; // Adjust to your backend URL
 
@@ -27,10 +28,10 @@ export default function AdminProjects() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch(`${API_URL}/projects`);
       const data = await response.json();
-      
+
       if (response.ok) {
         setProjects(data.projects);
       } else {
@@ -223,7 +224,7 @@ export default function AdminProjects() {
         {projects.length === 0 && !loading && (
           <div className="text-center py-8 text-gray-600">No projects yet. Add your first project!</div>
         )}
-        
+
         {projects.map((project) => (
           <div
             key={project.id}
@@ -231,7 +232,9 @@ export default function AdminProjects() {
           >
             <div className="flex-1">
               <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {project.title}
+                <Link to={`/admin/projects/${project.id}`} className="hover:text-blue-600 hover:underline">
+                  {project.title}
+                </Link>
               </h3>
               <p className="text-gray-600 mb-3">{project.description}</p>
               <div className="flex gap-2 flex-wrap">

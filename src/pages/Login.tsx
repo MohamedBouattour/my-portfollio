@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-export default function Login({isAuthenticated,isAdmin}:{isAuthenticated:boolean,isAdmin:boolean}) {
+export default function Login() {
+  const { login, isAuthenticated, isAdmin } = useAuth(); // Utilisation du hook
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [error, setError] = useState('');
-  const navigation = useNavigate()
+  const navigate = useNavigate();
 
   function handleChange(e: any) {
     setFormData({
@@ -18,7 +20,7 @@ export default function Login({isAuthenticated,isAdmin}:{isAuthenticated:boolean
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-  
+
     try {
       const res = await fetch('https://my-porfollio-backend.onrender.com/auth/login', {
         method: 'POST',
@@ -31,25 +33,48 @@ export default function Login({isAuthenticated,isAdmin}:{isAuthenticated:boolean
           password: formData.password,
         }),
       });
-  
+
       if (!res.ok) {
-        // Optionally parse error body
         const errorBody = await res.text();
         console.error('Request failed:', res.status, errorBody);
+        setError("Échec de la connexion. Vérifiez vos identifiants.");
         return;
       }
-  
+
       const data = await res.json();
 
-      localStorage.setItem('token',data.token)
+      // Sauvegarder le token si besoin (hors du scope context pour l'instant, mais utile)
+      localStorage.setItem('token', data.token);
+
+      // Mise à jour du contexte
+      // NOTE: Ici on simule le rôle admin basé sur l'email pour l'exemple,
+      // car le backend retourne juste un token. Dans un vrai cas, on décoderait le token.
+      const userRole = formData.email.includes('admin') ? 'admin' : 'visitor';
+
+      login({
+        email: formData.email,
+        role: userRole
+      });
+
       console.log('Success:', data);
+
+      // La redirection sera gérée par le useEffect ou le rendu conditionnel ci-dessous
+      // ou on peut forcer ici:
+      if (userRole === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/visitor');
+      }
+
     } catch (err) {
       console.error('Network error:', err);
+      setError("Erreur réseau. Veuillez réessayer.");
     }
   }
-  
-  if(isAuthenticated){
-    if(isAdmin){
+
+  // Redirection si déjà connecté
+  if (isAuthenticated) {
+    if (isAdmin) {
       return <Navigate to='/admin' />
     }
     return <Navigate to='/visitor' />

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide Authentification React</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css">
+    <style>
+        body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
+        @media (max-width: 767px) {
+            body {
+                padding: 15px;
+            }
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .quiz {
+            background-color: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+        .quiz h3 {
+            margin-top: 0;
+        }
+        .answer {
+            font-style: italic;
+            color: #57606a;
+            margin-top: 8px;
+            display: none; /* Cache les réponses par défaut pour l'exercice interactif si on voulait */
+        }
+        /* Pour l'impression, on affiche tout */
+        @media print {
+            body { 
+                padding: 0; 
+                max-width: 100%; 
+            }
+            .answer {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="markdown-body">
+
+<h1>Guide d'Implémentation : Authentification et Routes Imbriquées</h1>
+
+<p>Ce guide vous explique comment ajouter une fonctionnalité de connexion sécurisée à votre application React en utilisant <code>Context</code>, des <code>Hooks</code> personnalisés et <code>React Router</code>.</p>
+
+<h2>Objectifs 🎯</h2>
+<ol>
+    <li>Gérer l'état de l'utilisateur (connecté/déconnecté) globalement avec <strong>Context</strong>.</li>
+    <li>Créer un <strong>Hook personnalisé</strong> <code>useAuth</code> pour simplifier l'accès aux données.</li>
+    <li>Protéger les routes d'administration via un composant wrapper.</li>
+    <li>Maîtriser les Hooks avancés : <code>useParams</code>, <code>useEffect</code>, <code>useRef</code>.</li>
+</ol>
+
+<hr>
+
+<h2>Vue d'Ensemble 🗺️</h2>
+<p>Voici comment les composants interagissent entre eux :</p>
+
+<div class="mermaid">
+graph TD
+    A[AuthProvider] -->|Fournit Contexte| B[App]
+    B --> C[Routes]
+    C --> D[Public Routes]
+    C --> E[Protected Routes]
+    E -->|Vérifie Auth| F[ProtectedRoute]
+    F -->|Si Admin| G[Admin Pages]
+    F -->|Si Non Connecté| H[Login Page]
+    G --> I[Project Details]
+    
+    subgraph Data Flow
+    J[useAuth] -->|Consomme| A
+    G -->|Utilise| J
+    H -->|Modifie| J
+    end
+</div>
+
+<hr>
+
+<h2>Partie 1 : Authentification Simplifiée (<code>src/context/AuthContext.tsx</code>)</h2>
+
+<p>Nous utilisons un seul fichier pour tout gérer.</p>
+
+<pre><code class="language-tsx">
+import { createContext, useState, useEffect, useContext } from 'react';
+import type { ReactNode } from 'react';
+
+// ... (Code identique au précédent pour AuthContext)
+</code></pre>
+
+<hr>
+
+<h2>Partie 2 : Concepts Avancés 🚀</h2>
+
+<h3>1. Routes Dynamiques avec <code>useParams</code></h3>
+<p>Pour créer une page de détail (ex: <code>/admin/projects/123</code>), on utilise <code>useParams</code>.</p>
+
+<p><strong>Configuration Route (<code>App.tsx</code>) :</strong></p>
+<pre><code class="language-tsx">&lt;Route path="projects/:id" element={&lt;AdminProjectDetails /&gt;} /&gt;</code></pre>
+
+<p><strong>Récupération ID (<code>AdminProjectDetails.tsx</code>) :</strong></p>
+<pre><code class="language-tsx">
+import { useParams } from 'react-router-dom';
+
+export default function AdminProjectDetails() {
+  const { id } = useParams(); // id vaudra "123"
+  // ...
+}
+</code></pre>
+
+<h3>2. Le Cycle de Vie avec <code>useEffect</code></h3>
+<p>Ce hook permet d'effectuer des actions à des moments précis.</p>
+
+<ul>
+    <li><strong>Au montage seulement</strong> : <code>useEffect(..., [])</code></li>
+    <li><strong>Quand une variable change</strong> : <code>useEffect(..., [id])</code></li>
+    <li><strong>Nettoyage</strong> : <code>return () => { ... }</code></li>
+</ul>
+
+<h3>3. Références avec <code>useRef</code></h3>
+<p><code>useRef</code> a deux utilités principales :</p>
+<ol>
+    <li><strong>Accéder au DOM</strong> (ex: focus).</li>
+    <li><strong>Stocker une valeur mutable</strong> sans re-render.</li>
+</ol>
+
+<pre><code class="language-tsx">
+const inputRef = useRef&lt;HTMLInputElement&gt;(null);
+
+// Mettre le focus au chargement
+useEffect(() => {
+   if(inputRef.current) inputRef.current.focus();
+}, []);
+</code></pre>
+
+<hr>
+
+<h2>Quiz de Validation 🧠</h2>
+
+<div class="quiz">
+    <p><strong>Q1. Quelle méthode de <code>React Router</code> permet de récupérer <code>:id</code> dans l'URL ?</strong><br>
+    A) <code>useRoute</code><br>
+    B) <code>useParams</code><br>
+    C) <code>useHistory</code></p>
+
+    <p><strong>Q2. Que se passe-t-il si le tableau de dépendances de <code>useEffect</code> est vide <code>[]</code> ?</strong><br>
+    A) L'effet tourne à chaque seconde<br>
+    B) L'effet ne tourne jamais<br>
+    C) L'effet tourne une seule fois au montage</p>
+
+    <p><strong>Q3. <code>useRef</code> provoque-t-il un re-rendu du composant quand sa valeur change ?</strong><br>
+    A) Oui<br>
+    B) Non</p>
+    
+    <p><strong>Q4. Dans quel fichier avons-nous centralisé la logique d'auth ?</strong><br>
+    A) <code>src/hooks/useAuth.ts</code><br>
+    B) <code>src/context/AuthContext.tsx</code><br>
+    C) <code>src/App.js</code></p>
+
+    <p><strong>Q5. Comment protéger une route ?</strong><br>
+    A) Avec un mot de passe<br>
+    B) En l'enveloppant dans un composant (ex: <code>ProtectedRoute</code>) qui vérifie l'auth<br>
+    C) En supprimant le fichier</p>
+
+    <div class="answer">
+        <hr>
+        <strong>Réponses :</strong><br>
+        1: B, 2: C, 3: B, 4: B, 5: B
+    </div>
+</div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true });
+</script>
+
+</body>
+</html>
