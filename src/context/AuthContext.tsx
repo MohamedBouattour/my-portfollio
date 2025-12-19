@@ -1,9 +1,12 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import type { ReactNode } from 'react';
+import { decodeJWT, isTokenExpired } from '../utils/jwt';
 
 // Définition du type pour l'utilisateur
 interface User {
+  id?: string;
   email: string;
+  name?: string;
   role: 'admin' | 'visitor';
 }
 
@@ -11,15 +14,14 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  isAdmin: boolean; // Helper pour vérifier facilement si admin
-  login: (userData: User) => void;
+  isAdmin: boolean;
+  login: (token: string, userData?: User) => void;
   logout: () => void;
 }
 
-// Création du contexte avec une valeur par défaut nulle
+// Création du contexte
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-// Hook personnalisée exportée directement avec le contexte
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
@@ -28,31 +30,48 @@ export function useAuth() {
   return context;
 }
 
-// Provider qui va envelopper l'application
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  // Au démarrage, on vérifie si un utilisateur est déjà stocké (Optionnel pour l'exercice, mais bonne pratique simplifiée)
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    // Vérification du token au chargement
+    const token = localStorage.getItem('token');
+    if (token) {
+      if (isTokenExpired(token)) {
+        logout();
+      } else {
+        const decoded = decodeJWT(token);
+        // On map les champs du token vers notre objet User
+        // Le token contient { id, email, name, role, iat, exp }
+        setUser({
+          id: decoded.id,
+          email: decoded.email,
+          name: decoded.name,
+          role: decoded.role || 'visitor'
+        });
+      }
     }
   }, []);
 
-  const login = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const login = (token: string) => {
+    localStorage.setItem('token', token);
+    const decoded = decodeJWT(token);
+    const newUser: User = {
+      id: decoded.id,
+      email: decoded.email,
+      name: decoded.name,
+      role: decoded.role || 'visitor'
+    };
+    setUser(newUser);
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
-  // Calculer les états dérivés
-  const isAuthenticated = !!user; // true si user existe
+  const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';
 
   return (

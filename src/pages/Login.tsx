@@ -5,8 +5,8 @@ import { useAuth } from '../context/AuthContext';
 export default function Login() {
   const { login, isAuthenticated, isAdmin } = useAuth(); // Utilisation du hook
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: 'med@gmail.com',
+    password: '123456789',
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -51,10 +51,7 @@ export default function Login() {
       // car le backend retourne juste un token. Dans un vrai cas, on décoderait le token.
       const userRole = formData.email.includes('admin') ? 'admin' : 'visitor';
 
-      login({
-        email: formData.email,
-        role: userRole
-      });
+      login(data.token);
 
       console.log('Success:', data);
 

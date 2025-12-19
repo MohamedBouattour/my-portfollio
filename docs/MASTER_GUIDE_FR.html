@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshop React : Architecture, Auth & Déploiement</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            font-size: 16px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            padding: 2rem;
+        }
+        .markdown-body {
+            max-width: 980px;
+            margin: 0 auto;
+            background-color: #0d1117;
+            border-radius: 6px;
+        }
+        h1, h2, h3 { border-bottom: 1px solid #21262d; padding-bottom: .3em; color: #58a6ff; }
+        h1 { font-size: 2em; }
+        h2 { font-size: 1.5em; margin-top: 24px; }
+        h3 { font-size: 1.25em; margin-top: 24px; }
+        h4 { font-size: 1em; margin-top: 24px; color: #79c0ff; }
+        a { color: #58a6ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        pre {
+            background-color: #161b22;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+        code {
+            font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+            background-color: rgba(110,118,129,0.4);
+            padding: .2em .4em;
+            border-radius: 6px;
+        }
+        pre code { background-color: transparent; padding: 0; }
+        img { max-width: 100%; box-sizing: content-box; background-color: white; border-radius: 6px; padding: 10px; }
+        ol, ul { padding-left: 2em; }
+        li { margin-top: 0.25em; }
+        table { border-spacing: 0; border-collapse: collapse; width: 100%; margin-top: 0; margin-bottom: 16px; }
+        table th, table td { padding: 6px 13px; border: 1px solid #30363d; }
+        table tr { background-color: #0d1117; border-top: 1px solid #c6cbd1; }
+    </style>
+</head>
+<body>
+    <div class="markdown-body">
+<h1 id="workshopreactarchitectureauthdploiement">Workshop React : Architecture, Auth &amp; Déploiement 🎓</h1>
+<p><strong>Durée :</strong> 3 Heures<br />
+<strong>Niveau :</strong> Licence 3<br />
+<strong>Objectif :</strong> Préparer l'examen en maîtrisant l'architecture React moderne, l'authentification et le déploiement.</p>
+<hr />
+<h2 id="sommaire">Sommaire</h2>
+<ol>
+<li><a href="#1-routage--navigation-avance">Routage & Navigation Avancée</a></li>
+<li><a href="#2-la-gestion-dtat-globale-context-api">La Gestion d'État Globale (Context API)</a></li>
+<li><a href="#3-communication-api--architecture-service">Communication API & Architecture Service</a></li>
+<li><a href="#4-scurit--jwt-json-web-token">Sécurité & JWT</a></li>
+<li><a href="#5-react-hooks-avancs">Hooks Avancés (useEffect, useRef)</a></li>
+<li><a href="#6-dploiement-cicd-production">Déploiement CI/CD</a></li>
+</ol>
+<hr />
+<h2 id="1routagenavigationavance">1. Routage &amp; Navigation Avancée 🧭</h2>
+<h3 id="conceptclsinglepageapplicationspa">Concept Clé : Single Page Application (SPA)</h3>
+<p>Dans un site web classique ("Multi-Page Application"), chaque clic sur un lien demande une nouvelle page au serveur. Le navigateur recharge tout : HTML, CSS, Scripts. C'est lent et l'écran "flash".</p>
+<p>Dans une SPA React, <strong>on ne charge le site qu'une seule fois</strong>. Ensuite, c'est React qui intercepte les clics sur les liens et change uniquement le contenu principal de l'écran. C'est instantané et fluide, comme une application mobile native.</p>
+<h3 id="arborescencedesroutes">Arborescence des Routes</h3>
+<p>L'architecture de routes est la colonne vertébrale de votre application. Nous utilisons des <strong>routes imbriquées</strong> (Nested Routes) pour créer des mises en pages (Layouts) partagées.</p>
+<p><img src="./images/diagram_routing_tree_1766103607453.png" alt="Arborescence des Routes" /></p>
+<h3 id="outilsprincipauxreactrouterdom">Outils Principaux (<code>react-router-dom</code>)</h3>
+<ol>
+<li><strong><code>&lt;Routes&gt;</code> & <code>&lt;Route&gt;</code></strong> : La table de routage.</li>
+<li><strong><code>&lt;Outlet&gt;</code></strong> : L'emplacement où s'affiche le composant enfant dans un layout parent.</li>
+<li><strong><code>useNavigate()</code></strong> : Hook pour changer de page via le code (ex: après succès d'un formulaire).</li>
+<li><strong><code>useParams()</code></strong> : Récupérer les variables de l'URL.</li>
+</ol>
+<h3 id="exempleroutesimbriques">Exemple : Routes Imbriquées</h3>
+<pre><code class="tsx language-tsx">// App.tsx
+&lt;Routes&gt;
+  &lt;Route path="/" element={&lt;Login /&gt;} /&gt;
+
+  {/* Layout Admin protège toutes les routes enfants */}
+  &lt;Route path="/admin" element={&lt;AdminLayout /&gt;}&gt;
+    &lt;Route index element={&lt;Dashboard /&gt;} /&gt;     {/* /admin */}
+    &lt;Route path="projects" element={&lt;Projects /&gt;} /&gt; {/* /admin/projects */}
+    &lt;Route path="projects/:id" element={&lt;ProjectDetail /&gt;} /&gt; {/* /admin/projects/123 */}
+  &lt;/Route&gt;
+&lt;/Routes&gt;
+</code></pre>
+<h3 id="quizroutage10questions">🧠 Quiz Routage (10 Questions)</h3>
+<ol>
+<li><strong>Quel package standard utilise-t-on pour le routage React ?</strong><ul>
+<li>A) <code>react-route</code></li>
+<li>B) <code>react-router-dom</code></li>
+<li>C) <code>next.js</code></li></ul></li>
+<li><strong>À quoi sert <code>&lt;Outlet /&gt;</code> ?</strong><ul>
+<li>A) Afficher un pied de page</li>
+<li>B) Afficher le contenu de la route enfant active</li>
+<li>C) Sortir de l'application</li></ul></li>
+<li><strong>Comment définir un paramètre dynamique (ex: id) ?</strong><ul>
+<li>A) <code>/user/{id}</code></li>
+<li>B) <code>/user/:id</code></li>
+<li>C) <code>/user/$id</code></li></ul></li>
+<li><strong>Quel Hook permet de récupérer cet ID ?</strong><ul>
+<li>A) <code>useId()</code></li>
+<li>B) <code>useRouteMatch()</code></li>
+<li>C) <code>useParams()</code></li></ul></li>
+<li><strong>Quelle est la différence entre <code>&lt;Link&gt;</code> et <code>&lt;a&gt;</code> ?</strong><ul>
+<li>A) Aucune</li>
+<li>B) <code>Link</code> empêche le rechargement de la page (SPA)</li>
+<li>C) <code>Link</code> est plus rapide à écrire</li></ul></li>
+<li><strong>Comment rediriger l'utilisateur si la route n'existe pas (404) ?</strong><ul>
+<li>A) <code>&lt;Route path="*" element={&lt;NotFound /&gt;} /&gt;</code></li>
+<li>B) <code>&lt;Route path="404" ... /&gt;</code></li>
+<li>C) On ne peut pas</li></ul></li>
+<li><strong>Que fait <code>useNavigate(-1)</code> ?</strong><ul>
+<li>A) Va à la page d'accueil</li>
+<li>B) Retourne à la page précédente (Historique)</li>
+<li>C) Erreur</li></ul></li>
+<li><strong>Dans <code>&lt;Route path="admin" element={&lt;Layout /&gt;} &gt;</code>, le chemin des enfants est… ?</strong><ul>
+<li>A) Absolu (doit commencer par /)</li>
+<li>B) Relatif à "admin"</li></ul></li>
+<li><strong>Peut-on avoir plusieurs <code>&lt;Routes&gt;</code> dans l'app ?</strong><ul>
+<li>A) Oui</li>
+<li>B) Non, un seul autorisé</li></ul></li>
+<li><strong>Laquelle est une redirection automatique ?</strong><ul>
+<li>A) <code>&lt;Redirect /&gt;</code></li>
+<li>B) <code>&lt;Navigate to="..." /&gt;</code></li>
+<li>C) <code>&lt;Go to="..." /&gt;</code></li></ul></li>
+</ol>
+<p><em>(Réponses : 1B, 2B, 3B, 4C, 5B, 6A, 7B, 8B, 9A, 10B)</em></p>
+<hr />
+<h2 id="2lagestiondtatglobalecontextapi">2. La Gestion d'État Globale (Context API) 🧠</h2>
+<h3 id="questcequeltatglobal">Qu'est-ce que l'État Global ?</h3>
+<p>Dans React, les données ("state") coulent unidirectionnellement, du parent vers l'enfant via les <code>props</code>. C'est simple et prévisible.</p>
+<p>Cependant, quand une donnée est nécessaire à la fois dans la barre de navigation (Header), le tableau de bord (Dashboard) et le profil utilisateur (Profile), il faut la faire passer de parent en enfant, même si les composants intermédiaires n'en n'ont pas besoin. C'est ce qu'on appelle le <strong>Prop Drilling</strong> (Forage de props).</p>
+<h3 id="leproblmepropdrilling">Le Problème : Prop Drilling</h3>
+<p><img src="./images/diagram_prop_drilling_context_1766103628738.png" alt="Prop Drilling vs Context" /></p>
+<p><em>Le composant Main et Dashboard n'ont pas besoin de <code>user</code>, mais doivent le transporter.</em></p>
+<h3 id="lasolutioncontext">La Solution : Context</h3>
+<p>Le Contexte agit comme une téléportation de données. (Voir schéma ci-dessus, partie droite).</p>
+<h3 id="implmentationen3tapes">Implémentation en 3 Étapes</h3>
+<ol>
+<li><strong>Créer</strong> : <code>const AuthContext = createContext(null);</code></li>
+<li><strong>Fournir</strong> : Envelopper l'app avec <code>&lt;AuthContext.Provider value={user}&gt; ... &lt;/AuthContext.Provider&gt;</code></li>
+<li><strong>Consommer</strong> : <code>const user = useContext(AuthContext);</code></li>
+</ol>
+<p><strong>Bonne pratique :</strong> Créer un Hook personnalisé <code>useAuth()</code> pour sécuriser l'accès (vérifier si le contexte existe).</p>
+<h3 id="quizcontext10questions">🧠 Quiz Context (10 Questions)</h3>
+<ol>
+<li><strong>Quel problème résout principalement le Context ?</strong><ul>
+<li>A) La performance</li>
+<li>B) Le Prop Drilling (passage d'héritage profond)</li>
+<li>C) Le routage</li></ul></li>
+<li><strong>Quelle méthode crée le contexte ?</strong><ul>
+<li>A) <code>React.createContext()</code></li>
+<li>B) <code>new Context()</code></li>
+<li>C) <code>useContext()</code></li></ul></li>
+<li><strong>Quel composant "diffuse" la donnée ?</strong><ul>
+<li>A) Le Consumer</li>
+<li>B) Le Provider</li>
+<li>C) Le Dispatcher</li></ul></li>
+<li><strong>Si je change la valeur du Provider, que se passe-t-il ?</strong><ul>
+<li>A) Rien</li>
+<li>B) Tous les consommateurs se re-rendent (mettent à jour)</li>
+<li>C) L'application reload</li></ul></li>
+<li><strong>Peut-on avoir plusieurs Contextes ?</strong><ul>
+<li>A) Non, un seul global</li>
+<li>B) Oui (Auth, Theme, Language…)</li></ul></li>
+<li><strong>Que retourne <code>useContext(MyContext)</code> ?</strong><ul>
+<li>A) La prop <code>value</code> passée au Provider le plus proche</li>
+<li>B) L'objet Contexte entier</li>
+<li>C) Undefined</li></ul></li>
+<li><strong>Pourquoi faire un Hook <code>useAuth</code> ?</strong><ul>
+<li>A) Pour ne pas importer <code>useContext</code> et <code>AuthContext</code> partout</li>
+<li>B) Pour ajouter une validation (Throw error si hors provider)</li>
+<li>C) Les deux</li></ul></li>
+<li><strong>Context remplace-t-il Redux/Zustand ?</strong><ul>
+<li>A) Oui, totalement</li>
+<li>B) Non, Context est pour les états globaux simples, Redux pour les états complexes et fréquents</li></ul></li>
+<li><strong>La valeur par défaut du Context sert quand… ?</strong><ul>
+<li>A) Le Provider est présent</li>
+<li>B) On essaie de consommer le contexte SANS Provider parent</li></ul></li>
+<li><strong>Peut-on passer des fonctions dans le Context ?</strong><ul>
+<li>A) Oui (ex: login(), logout())</li>
+<li>B) Non, que des objets JSON</li></ul></li>
+</ol>
+<p><em>(Réponses : 1B, 2A, 3B, 4B, 5B, 6A, 7C, 8B, 9B, 10A)</em></p>
+<hr />
+<h2 id="3communicationapiarchitectureservice">3. Communication API &amp; Architecture Service 📡</h2>
+<p>Une application frontend moderne n'est qu'une coquille vide sans données. Elle doit dialoguer en permanence avec un Backend via une API REST.</p>
+<p>La pire erreur des débutants est d'écrire les appels réseaux (<code>fetch</code>) directement dans les composants visuels.</p>
+<p><strong>Pourquoi ?</strong></p>
+<ol>
+<li><strong>Duplication</strong> : Si l'URL de l'API change, vous devez modifier 50 fichiers.</li>
+<li><strong>Maintenance</strong> : La logique métier est mélangée à la logique d'affichage.</li>
+<li><strong>Gestion des Tokens</strong> : Il est très difficile d'ajouter le token d'authentification partout manuellement.</li>
+</ol>
+<h3 id="architecturerecommandeleservicelayer">Architecture Recommandée : Le Service Layer</h3>
+<p>Nous allons créer une couche intermédiaire, le <strong>Service Layer</strong>, qui isole toute la communication avec le serveur.</p>
+<pre><code>src/
+├── services/           # Logique API pure
+│   ├── api.ts          # Client HTTP générique (intercepteurs, token)
+│   ├── auth.service.ts # Login, Register
+│   └── project.service.ts # GET/POST projects
+</code></pre>
+<h3 id="lewrapperapiapits">Le Wrapper API (<code>api.ts</code>)</h3>
+<p>Il doit gérer automatiquement :</p>
+<ol>
+<li><strong>URL de base</strong> (localhost vs production).</li>
+<li><strong>Headers</strong> (<code>Authorization: Bearer ...</code>).</li>
+<li><strong>Erreurs</strong> (Redirection login si 401).</li>
+</ol>
+<pre><code class="tsx language-tsx">// services/project.service.ts
+import { request } from './api';
+
+export const ProjectService = {
+    getAll: () =&gt; request('/projects'),
+    create: (data) =&gt; request('/projects', { method: 'POST', json: data })
+};
+</code></pre>
+<h3 id="quizapi10questions">🧠 Quiz API (10 Questions)</h3>
+<ol>
+<li><strong>Pourquoi séparer l'API dans un dossier <code>services</code> ?</strong><ul>
+<li>A) C'est obligatoire</li>
+<li>B) Pour réutiliser le code et séparer les responsabilités (Separation of Concerns)</li></ul></li>
+<li><strong>Quel outil natif JS permet de faire des requêtes ?</strong><ul>
+<li>A) Axios</li>
+<li>B) Fetch API</li>
+<li>C) Ajax</li></ul></li>
+<li><strong>Que manque-t-il à <code>fetch</code> par défaut (vs Axios) ?</strong><ul>
+<li>A) Les Promesses</li>
+<li>B) Le jet d'erreur automatique sur 4xx/5xx et le JSON stringify automatique</li></ul></li>
+<li><strong>Si l'API est sur un autre port, quel problème risque-t-on ?</strong><ul>
+<li>A) CORS (Cross-Origin Resource Sharing)</li>
+<li>B) DDOS</li>
+<li>C) 404</li></ul></li>
+<li><strong>Comment utilise-t-on une variable d'environnement pour l'URL API (Vite) ?</strong><ul>
+<li>A) <code>process.env.API_URL</code></li>
+<li>B) <code>import.meta.env.VITE_API_URL</code></li>
+<li>C) <code>const url = "http://..."</code></li></ul></li>
+<li><strong>Que signifie asynchrone (async/await) ?</strong><ul>
+<li>A) Le code s'exécute en parallèle</li>
+<li>B) Le code attend la réponse avant de continuer la ligne suivante</li></ul></li>
+<li><strong>Quel verbe HTTP pour une suppression ?</strong><ul>
+<li>A) REMOVE</li>
+<li>B) DELETE</li>
+<li>C) POST</li></ul></li>
+<li><strong>Quel verbe pour une mise à jour partielle ?</strong><ul>
+<li>A) PUT</li>
+<li>B) PATCH</li>
+<li>C) CHANGE</li></ul></li>
+<li><strong>Dans quel Hook React fait-on généralement les appels API de chargement ?</strong><ul>
+<li>A) <code>useState</code></li>
+<li>B) <code>useEffect</code></li>
+<li>C) <code>useMemo</code></li></ul></li>
+<li><strong>Comment typer le retour de l'API avec TypeScript ?</strong><ul>
+<li>A) <code>request&lt;MyType&gt;(...)</code></li>
+<li>B) On ne peut pas</li>
+<li>C) <code>const data: string = ...</code></li></ul></li>
+</ol>
+<p><em>(Réponses : 1B, 2B, 3B, 4A, 5B, 6B, 7B, 8B, 9B, 10A)</em></p>
+<hr />
+<h2 id="4scuritjwtjsonwebtoken">4. Sécurité &amp; JWT (JSON Web Token) 🔐</h2>
+<p>L'authentification est le pilier de la sécurité. Contrairement aux anciens sites web qui utilisaient des "Sessions" stockées sur la mémoire vive du serveur, les applications modernes sont <strong>Stateless</strong> (Sans état).</p>
+<p>Cela signifie que le serveur ne garde AUCUNE trace de vous après vous avoir répondu. Pour chaque nouvelle requête (ex: "Donne-moi mes projets"), vous devez repréver votre identité.</p>
+<p>C'est là qu'intervient le <strong>JWT (JSON Web Token)</strong>. C'est un badge numérique infalsifiable que le serveur vous donne lors du Login, et que vous devez présenter à chaque appel.</p>
+<h3 id="fluxdauthentification">Flux d'Authentification</h3>
+<ol>
+<li>L'utilisateur envoie ses identifiants.</li>
+<li>Le serveur vérifie et génère un Token signé cryptographiquement.</li>
+<li>Le client (React) stocke ce token (ex: LocalStorage).</li>
+<li>Pour chaque requête future, React attache le token dans le Header HTTP.</li>
+</ol>
+<p><img src="./images/diagram_auth_flow_1766103647344.png" alt="Flux d'Authentification" /></p>
+<h3 id="anatomiedujwt">Anatomie du JWT</h3>
+<p>Exemple réel : <code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</code></p>
+<ol>
+<li><strong>Header (Rouge)</strong> : <code>{"alg": "HS256", "typ": "JWT"}</code></li>
+<li><strong>Payload (Violet)</strong> : <code>{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}</code> (Lisible par tous !)</li>
+<li><strong>Signature (Bleu)</strong> : <code>HMACSHA256(...)</code> (Garanti l'intégrité).</li>
+</ol>
+<p><strong>Attention :</strong> Ne jamais mettre de mot de passe dans le Payload !</p>
+<h3 id="quizscurit10questions">🧠 Quiz Sécurité (10 Questions)</h3>
+<ol>
+<li><strong>Que signifie JWT ?</strong><ul>
+<li>A) Java Web Token</li>
+<li>B) JSON Web Token</li>
+<li>C) Javascript Web Token</li></ul></li>
+<li><strong>Où le client stocke-t-il le token le plus souvent ?</strong><ul>
+<li>A) Dans le code</li>
+<li>B) LocalStorage ou Cookie</li>
+<li>C) Dans la base de données</li></ul></li>
+<li><strong>Le serveur stocke-t-il la session ?</strong><ul>
+<li>A) Oui</li>
+<li>B) Non (Stateless)</li></ul></li>
+<li><strong>Si je modifie le payload du token manuellement… ?</strong><ul>
+<li>A) Je deviens admin</li>
+<li>B) La signature ne correspond plus, le serveur rejette le token</li></ul></li>
+<li><strong>Quel header HTTP envoie le token ?</strong><ul>
+<li>A) Authorization</li>
+<li>B) Authentication</li>
+<li>C) Token</li></ul></li>
+<li><strong>Le préfixe standard du token est… ?</strong><ul>
+<li>A) Token</li>
+<li>B) Bearer</li>
+<li>C) Basic</li></ul></li>
+<li><strong>Si le token expire (401), que doit faire le Front ?</strong><ul>
+<li>A) Déconnecter l'utilisateur</li>
+<li>B) Rien</li>
+<li>C) Rafraîchir la page</li></ul></li>
+<li><strong>Peut-on lire le contenu du token coté client ?</strong><ul>
+<li>A) Oui (base64 decode)</li>
+<li>B) Non, c'est crypté</li></ul></li>
+<li><strong>A quoi sert le Refresh Token ?</strong><ul>
+<li>A) A obtenir un nouveau token d'accès sans se reloguer</li>
+<li>B) A rafraichir la page</li></ul></li>
+<li><strong>HTTPS est-il obligatoire pour transmettre le token ?</strong><ul>
+<li>A) Non</li>
+<li>B) Oui, sinon n'importe qui peut l'intercepter (Man In The Middle)</li></ul></li>
+</ol>
+<p><em>(Réponses : 1B, 2B, 3B, 4B, 5A, 6B, 7A, 8A, 9A, 10B)</em></p>
+<hr />
+<h2 id="5reacthooksavancs">5. React Hooks Avancés 🎣</h2>
+<p>Avant les Hooks (2019), React utilisait des classes complexes pour gérer le cycle de vie (<code>componentDidMount</code>, etc.). Les Hooks ont simplifié cela en permettant d'utiliser l'état et le cycle de vie dans de simples fonctions.</p>
+<h3 id="useeffectsynchronisationeteffetsdebord"><code>useEffect</code> : Synchronisation et Effets de bord</h3>
+<p>Ne pensez pas à <code>useEffect</code> comme "quand le composant charge".
+Pensez-y comme : <strong>"Synchronise ce composant avec un système extérieur"</strong>.</p>
+<p>Exemples de systèmes extérieurs :</p>
+<ul>
+<li>Une API (fetch datas)</li>
+<li>Le titre du document (document.title)</li>
+<li>Un timer (setInterval)</li>
+<li>Un abonnement WebSocket</li>
+</ul>
+<p>Il remplace à lui seul <code>componentDidMount</code>, <code>componentDidUpdate</code>, et <code>componentWillUnmount</code>.</p>
+<h3 id="useeffectlecycledevie"><code>useEffect</code> : Le cycle de vie</h3>
+<p>Il remplace <code>componentDidMount</code>, <code>componentDidUpdate</code>, <code>componentWillUnmount</code>.</p>
+<ol>
+<li><strong>Montage</strong> : <code>useEffect(() =&gt; { ... }, [])</code></li>
+<li><strong>Mise à jour</strong> : <code>useEffect(() =&gt; { ... }, [prop])</code></li>
+<li><strong>Démontage</strong> : <code>useEffect(() =&gt; { return () =&gt; ... }, [])</code></li>
+</ol>
+<h3 id="usereflapersistancesilencieuse"><code>useRef</code> : La persistance silencieuse</h3>
+<p><code>useRef</code> est une "boîte" qui permet de stocker une valeur qui persiste pendant toute la durée de vie du composant, mais <strong>dont la modification ne déclenche pas de re-render</strong>.</p>
+<p>Dans notre projet (<code>src/pages/admin/AdminProjectDetails.tsx</code>), nous utilisons <code>useRef</code> pour deux cas précis :</p>
+<p><img src="./images/diagram_usestate_vs_useref_1766105462366.png" alt="Comparaison useState vs useRef" /></p>
+<h4 id="cas1compteurderenduspersistancesansrerender">Cas 1 : Compteur de rendus (Persistance sans Re-render)</h4>
+<p>Nous voulons savoir combien de fois le composant s'est affiché (pour le débogage), sans que l'incrémentation de ce compteur ne crée elle-même une boucle infini de re-renders.</p>
+<pre><code class="tsx language-tsx">// src/pages/admin/AdminProjectDetails.tsx
+
+const renderCount = useRef(0); // Initialisation
+
+useEffect(() =&gt; {
+    renderCount.current = renderCount.current + 1;
+    // On change la valeur, mais REACT NE RE-DESSINE PAS LE COMPOSANT
+    console.log(`Composant rendu ${renderCount.current} fois`);
+});
+</code></pre>
+<p><strong>Pourquoi pas <code>useState</code> ?</strong>
+Si on faisait <code>setCount(count + 1)</code> dans un <code>useEffect</code>, cela déclencherait un rendu... qui déclencherait <code>useEffect</code>... qui déclencherait un rendu... <strong>Boucle Infinie !</strong> 💥</p>
+<h4 id="cas2accsdirectaudomfocusinput">Cas 2 : Accès direct au DOM (Focus Input)</h4>
+<p>Parfois, nous avons besoin de prendre le contrôle manuel d'un élément HTML, par exemple pour mettre le curseur dans un champ de texte dès que la page charge.</p>
+<pre><code class="tsx language-tsx">// src/pages/admin/AdminProjectDetails.tsx
+
+const titleInputRef = useRef&lt;HTMLInputElement&gt;(null);
+
+useEffect(() =&gt; {
+    // Si le projet est chargé, on met le focus dans l'input
+    if (project &amp;&amp; titleInputRef.current) {
+        titleInputRef.current.focus(); 
+    }
+}, [project]);
+
+return (
+    &lt;input
+        ref={titleInputRef} // On lie l'élément HTML à notre variable React
+        defaultValue={project.title}
+    /&gt;
+);
+</code></pre>
+<h4 id="rsum">Résumé</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Hook</th>
+<th style="text-align:left">Déclenche un Re-render ?</th>
+<th style="text-align:left">Usage Principal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong><code>useState</code></strong></td>
+<td style="text-align:left">✅ OUI</td>
+<td style="text-align:left">Données affichées à l'écran (Texte, Listes...)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>useRef</code></strong></td>
+<td style="text-align:left">❌ NON</td>
+<td style="text-align:left">Valeurs techniques (Timers, Logs) ou accès DOM</td>
+</tr>
+</tbody>
+</table>
+<h3 id="quizhooks10questions">🧠 Quiz Hooks (10 Questions)</h3>
+<ol>
+<li><strong>Qu'est-ce qu'un Hook ?</strong><ul>
+<li>A) Une fonction qui commence par <code>use</code></li>
+<li>B) Une classe</li>
+<li>C) Un composant</li></ul></li>
+<li><strong>Laquelle est une règle des Hooks ?</strong><ul>
+<li>A) Ne pas utiliser dans des boucles ou conditions</li>
+<li>B) Utiliser uniquement dans les Class Components</li></ul></li>
+<li><strong><code>useEffect(() =&gt; x, [])</code> s'exécute… ?</strong><ul>
+<li>A) À chaque rendu</li>
+<li>B) Une seule fois (Montage)</li>
+<li>C) Jamais</li></ul></li>
+<li><strong><code>useEffect(() =&gt; x)</code> (sans tableau) s'exécute… ?</strong><ul>
+<li>A) Une seule fois</li>
+<li>B) À chaque rendu</li></ul></li>
+<li><strong><code>useRef</code> déclenche-t-il un re-render ?</strong><ul>
+<li>A) Oui</li>
+<li>B) Non</li></ul></li>
+<li><strong>Comment accèder à la valeur actuelle d'une ref ?</strong><ul>
+<li>A) <code>ref.value</code></li>
+<li>B) <code>ref.current</code></li>
+<li>C) <code>ref.now</code></li></ul></li>
+<li><strong>Pour nettoyer un abonnement (Event Listener) dans useEffect, on utilise… ?</strong><ul>
+<li>A) <code>return function</code></li>
+<li>B) <code>delete function</code></li>
+<li>C) <code>clear()</code></li></ul></li>
+<li><strong>Peut-on créer ses propres Hooks ?</strong><ul>
+<li>A) Oui (Custom Hooks)</li>
+<li>B) Non</li></ul></li>
+<li><strong>Dans quel ordre s'exécutent les Hooks ?</strong><ul>
+<li>A) Aléatoire</li>
+<li>B) Toujours le même ordre à chaque rendu (c'est pourquoi pas de if/for)</li></ul></li>
+<li><strong><code>const [state, setState] = useState(0)</code> : <code>setState</code> est-il synchrone ?</strong><ul>
+<li>A) Oui</li>
+<li>B) Non, React planifie la mise à jour</li></ul></li>
+</ol>
+<p><em>(Réponses : 1A, 2A, 3B, 4B, 5B, 6B, 7A, 8A, 9B, 10B)</em></p>
+<hr />
+<h2 id="6dploiementcicdproduction">6. Déploiement CI/CD (Production) 🚀</h2>
+<p>"Ça marche sur ma machine" n'est pas une excuse valable. Le but ultime du développement est la mise en production.</p>
+<p>Traditionnellement, déployer était long et risqué (copier des fichiers via FTP). Aujourd'hui, nous utilisons le <strong>CI/CD (Continuous Integration / Continuous Deployment)</strong>.</p>
+<p>L'idée est d'automatiser le processus :</p>
+<ol>
+<li>Vous sauvegardez votre code sur GitHub.</li>
+<li>GitHub prévient Vercel.</li>
+<li>Vercel télécharge votre code, installe les dépendances, construit le site optimisé, et le met en ligne.</li>
+<li>Tout cela en moins de 2 minutes, sans action humaine.</li>
+</ol>
+<h3 id="notrepipelinestacktechnique">Notre Pipeline (Stack Technique)</h3>
+<p><img src="./images/diagram_cicd_pipeline_1766103664258.png" alt="Pipeline DEploiement CI/CD" /></p>
+<h3 id="configurationrequise">Configuration Requise</h3>
+<ol>
+<li><strong>.env.local</strong> (Dev) : <code>VITE_API_URL=http://localhost...</code></li>
+<li><strong>Vercel Env Vars</strong> (Prod) : <code>VITE_API_URL=https://mon-backend-render.com</code></li>
+</ol>
+<p><strong>CI/CD (Continuous Integration / Continuous Deployment)</strong> :
+À chaque fois que vous "poussez" (Push) sur la branche <code>main</code>, Vercel détecte le changement, reconstruit le projet (npm run build) et le met en ligne.</p>
+<h3 id="quizdploiement10questions">🧠 Quiz Déploiement (10 Questions)</h3>
+<ol>
+<li><strong>Que signifie CI/CD ?</strong><ul>
+<li>A) Code In / Code Down</li>
+<li>B) Continuous Integration / Continuous Deployment</li></ul></li>
+<li><strong>Pourquoi ne pas commiter le dossier <code>node_modules</code> ?</strong><ul>
+<li>A) C'est trop lourd et générable via <code>package.json</code></li>
+<li>B) C'est illégal</li></ul></li>
+<li><strong>Quel fichier contrôle les fichiers ignorés par Git ?</strong><ul>
+<li>A) <code>.gitremove</code></li>
+<li>B) <code>.gitignore</code></li>
+<li>C) <code>ignore.txt</code></li></ul></li>
+<li><strong>Si mon site marche en local mais pas en ligne, c'est souvent… ?</strong><ul>
+<li>A) Une variable d'environnement manquante</li>
+<li>B) Vercel est en panne</li></ul></li>
+<li><strong>Quelle commande Vercel exécute-t-il pour construire le site ?</strong><ul>
+<li>A) <code>npm run start</code></li>
+<li>B) <code>npm run build</code></li>
+<li>C) <code>npm run dev</code></li></ul></li>
+<li><strong>Où se trouve le résultat du build ?</strong><ul>
+<li>A) Dossier <code>src</code></li>
+<li>B) Dossier <code>dist</code> (ou build)</li>
+<li>C) Dossier <code>public</code></li></ul></li>
+<li><strong>Qu'est-ce qu'une variable d'environnement ?</strong><ul>
+<li>A) Une variable globale JS</li>
+<li>B) Une configuration secrète ou spécifique à l'environnement (Dev/Prod)</li></ul></li>
+<li><strong>Comment mettre à jour le site en ligne ?</strong><ul>
+<li>A) Envoyer un mail à Vercel</li>
+<li>B) <code>git push origin main</code></li>
+<li>C) Upload FTP</li></ul></li>
+<li><strong>Notre backend sur Render est-il statique ou dynamique ?</strong><ul>
+<li>A) Statique (HTML)</li>
+<li>B) Dynamique (API Node.js)</li></ul></li>
+<li><strong>Si j'ai une erreur CORS en ligne… ?</strong><ul>
+<li>A) C'est que le Backend n'autorise pas le domaine du Frontend (Vercel)</li>
+<li>B) C'est que j'ai mal codé le Frontend</li></ul></li>
+</ol>
+<p><em>(Réponses : 1B, 2A, 3B, 4A, 5B, 6B, 7B, 8B, 9B, 10A)</em></p>
+    </div>
+</body>
+</html>

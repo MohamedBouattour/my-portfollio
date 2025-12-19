@@ -123,56 +123,159 @@ return <input ref={inputRef} />;
 
 ---
 
+## Partie 3 : Architecture API & Bonnes Pratiques 🛠️
+
+Pour garder le code propre, il est crucial de ne pas faire les appels `fetch` directement dans les composants.
+
+### Architecture Recommandée
+Nous avons créé un guide détaillé sur l'architecture API ici : [API_BEST_PRACTICES.md](./API_BEST_PRACTICES.md).
+
+**En résumé :**
+1.  **Services** : Tous les appels API sont dans `src/services/`.
+2.  **Types** : Les interfaces TypeScript sont dans `src/types/`.
+3.  **Token** : Le token est géré automatiquement par le wrapper `api.ts`.
+4.  **Gestion d'erreur** : Centralisée pour éviter de répéter les `try/catch`.
+
+Exemple d'utilisation avec le nouveau service :
+```tsx
+import { ProjectService } from '../services/project.service';
+
+// Dans votre composant
+useEffect(() => {
+  ProjectService.getAll().then(data => setProjects(data));
+}, []);
+```
+
+---
+
+
+---
+
+## Partie 4 : Comprendre le JWT (JSON Web Token) 🔑
+
+Le **JWT** est un standard pour échanger des informations de manière sécurisée.
+Il est composé de 3 parties séparées par des points (`.`) :
+
+1.  **Header** : L'algo de cryptage (ex: HS256).
+2.  **Payload** : Les données de l'utilisateur (id, email, expiration).
+3.  **Signature** : Assure que le token n'a pas été modifié.
+
+**Flux d'authentification :**
+1.  L'utilisateur envoie email/password au serveur.
+2.  Le serveur vérifie et renvoie un **Token** signé.
+3.  Le client stocke ce Token (localStorage ou Cookie).
+4.  Pour chaque requête suivante, le client envoie le Token dans le header `Authorization`.
+
+### Décodage Côté Client (`src/utils/jwt.ts`)
+Nous ne pouvons pas vérifier la signature (seul le serveur a la clé secrète), mais nous pouvons **décoder** le payload pour afficher le nom ou vérifier l'expiration.
+
+```typescript
+// Exemple de fonction de décodage simple (base64)
+export function decodeJWT(token) {
+  const payload = token.split('.')[1];
+  return JSON.parse(atob(payload));
+}
+```
+
+---
+
+## Partie 5 : WebServices et CRUD 📡
+
+Le **CRUD** (Create, Read, Update, Delete) est la base des applications web.
+
+### Architecture Service
+Pour éviter de dupliquer le code `fetch`, on utilise des **Services**.
+
+**Exemple : `ProjectService`**
+- **GET** (Read) : `client.get('/projects')`
+- **POST** (Create) : `client.post('/projects', data)`
+- **PUT** (Update) : `client.put('/projects/${id}', data)`
+- **DELETE** (Delete) : `client.delete('/projects/${id}')`
+
+### L'importance du Context
+Le `Context` React sert à partager des données "globales" (Auth, Thème, Langue) sans passer les props manuellement à chaque étage ("Prop Drilling").
+
+---
+
+## Partie 6 : Le Hook useEffect en Détail 🎣
+
+`useEffect` synchronise votre composant avec un système extérieur (API, DOM, Timer).
+
+### Les 4 Mouvements du useEffect
+
+1.  **Mounting (Démarrage)** : Le tableau de dépendances est vide `[]`.
+    *Exemple : Charger des données au lancement.*
+2.  **Updating (Mise à jour)** : Le tableau contient des variables `[id, user]`.
+    *Exemple : Recharger les données quand l'ID change.*
+3.  **Unmounting (Nettoyage)** : La fonction retourne une autre fonction.
+    *Exemple : Couper une connexion WebSocket.*
+4.  **No Dependency (Danger)** : Pas de tableau.
+    *S'exécute à chaque rendu. À éviter sauf cas rares.*
+
+```typescript
+useEffect(() => {
+  // 1. Code exécuté au montage ou update
+  const timer = setInterval(() => console.log('Tic'), 1000);
+
+  // 2. Fonction de nettoyage (exécutée avant le prochain effet ou au démontage)
+  return () => {
+    clearInterval(timer); // Important pour éviter les fuites de mémoire !
+  };
+}, []); // Tableau de dépendances
+```
+
+---
+
 ## Quiz de Validation 🧠
 
-**Q1. Quelle méthode de `React Router` permet de récupérer `:id` dans l'URL ?**
+**Q1. Quelle partie du JWT contient les données utilisateur ?**
+A) Header
+B) Payload
+C) Signature
+
+**Q2. Que signifie CRUD ?**
+A) Create, Read, Update, Delete
+B) Code, Run, Unit, Debug
+C) Connect, Request, User, Database
+
+**Q3. Pourquoi utiliser un Service pour les appels API ?**
+A) Pour rendre le code plus lent
+B) Pour centraliser la logique et réutiliser le code
+C) C'est obligatoire par React
+
+**Q4. Si je veux exécuter un effet uniquement quand la variable `userId` change, que dois-je mettre dans le tableau de dépendances ?**
+A) `[]`
+B) `[userId]`
+C) Rien du tout
+
+**Q5. Comment envoyer le token au serveur de manière sécurisée ?**
+A) Dans l'URL
+B) Dans le header `Authorization: Bearer <token>`
+C) Dans le body de chaque requête
+
+**Q6. Que se passe-t-il si on oublie la fonction de nettoyage dans un `useEffect` qui crée un `setInterval` ?**
+A) Rien de grave
+B) Le timer continue de tourner indéfiniment (fuite de mémoire)
+C) React plante immédiatement
+
+**Q7. Quelle méthode de `React Router` permet de récupérer `:id` dans l'URL ?**
 A) `useRoute`
 B) `useParams`
 C) `useHistory`
 
-**Q2. Que se passe-t-il si le tableau de dépendances de `useEffect` est vide `[]` ?**
-A) L'effet tourne à chaque seconde
-B) L'effet ne tourne jamais
-C) L'effet tourne une seule fois au montage
-
-**Q3. `useRef` provoque-t-il un re-rendu du composant quand sa valeur change ?**
+**Q8. `useRef` provoque-t-il un re-rendu du composant quand sa valeur change ?**
 A) Oui
 B) Non
 
-**Q4. Dans quel fichier avons-nous centralisé la logique d'auth ?**
+**Q9. Dans quel fichier avons-nous centralisé la logique d'auth ?**
 A) `src/hooks/useAuth.ts`
 B) `src/context/AuthContext.tsx`
 C) `src/App.js`
 
-**Q5. Comment protéger une route ?**
-A) Avec un mot de passe
-B) En l'enveloppant dans un composant (ex: `ProtectedRoute`) qui vérifie l'auth
-C) En supprimant le fichier
-
-**Q6. Quelle est la valeur par défaut pour `user` dans notre contexte ?**
-A) `undefined`
-B) `null`
-C) `{}`
-
-**Q7. Que doit retourner la fonction de nettoyage dans `useEffect` ?**
-A) Une promesse
-B) Une fonction
-C) Un booléen
-
-**Q8. Pour utiliser le contexte, quel composant doit englober l'application ?**
-A) `AuthProvider`
-B) `AppWrapper`
-C) `ContextProvider`
-
-**Q9. Pourquoi utiliser `Link` au lieu de `a href` ?**
-A) C'est plus joli
-B) Pour éviter de recharger toute la page (SPA)
-C) C'est obligatoire en HTML5
-
-**Q10. A quoi sert `renderCount.current` dans notre exemple `useRef` ?**
-A) Compter les clics
-B) Compter le nombre de rendus sans déclencher de boucle infinie
-C) Afficher l'heure
+**Q10. Que faut-il faire si le token est expiré (401) ?**
+A) Réessayer en boucle
+B) Déconnecter l'utilisateur et le rediriger vers le Login
+C) Ignorer l'erreur
 
 ---
-*Réponses : 1B, 2C, 3B, 4B, 5B, 6B, 7B, 8A, 9B, 10B*
+*Réponses : 1B, 2A, 3B, 4B, 5B, 6B, 7B, 8B, 9B, 10B*

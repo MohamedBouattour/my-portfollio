@@ -24,168 +24,238 @@
             justify-content: center;
             margin: 20px 0;
         }
-        .quiz {
-            background-color: #f6f8fa;
-            border: 1px solid #d0d7de;
-            border-radius: 6px;
-            padding: 16px;
-            margin-top: 20px;
-        }
-        .quiz h3 {
-            margin-top: 0;
-        }
-        .answer {
-            font-style: italic;
-            color: #57606a;
-            margin-top: 8px;
-            display: none; /* Cache les réponses par défaut pour l'exercice interactif si on voulait */
-        }
-        /* Pour l'impression, on affiche tout */
-        @media print {
-            body { 
-                padding: 0; 
-                max-width: 100%; 
-            }
-            .answer {
-                display: block;
-            }
-        }
     </style>
 </head>
 <body class="markdown-body">
-
-<h1>Guide d'Implémentation : Authentification et Routes Imbriquées</h1>
-
+<h1 id="guidedimplmentationauthentificationetroutesimbriques">Guide d'Implémentation : Authentification et Routes Imbriquées</h1>
 <p>Ce guide vous explique comment ajouter une fonctionnalité de connexion sécurisée à votre application React en utilisant <code>Context</code>, des <code>Hooks</code> personnalisés et <code>React Router</code>.</p>
-
-<h2>Objectifs 🎯</h2>
+<h2 id="objectifs">Objectifs 🎯</h2>
 <ol>
-    <li>Gérer l'état de l'utilisateur (connecté/déconnecté) globalement avec <strong>Context</strong>.</li>
-    <li>Créer un <strong>Hook personnalisé</strong> <code>useAuth</code> pour simplifier l'accès aux données.</li>
-    <li>Protéger les routes d'administration via un composant wrapper.</li>
-    <li>Maîtriser les Hooks avancés : <code>useParams</code>, <code>useEffect</code>, <code>useRef</code>.</li>
+<li>Gérer l'état de l'utilisateur (connecté/déconnecté) globalement avec <strong>Context</strong>.</li>
+<li>Créer un <strong>Hook personnalisé</strong> <code>useAuth</code> pour simplifier l'accès aux données.</li>
+<li>Protéger les routes d'administration via un composant wrapper.</li>
+<li>Maîtriser les Hooks avancés : <code>useParams</code>, <code>useEffect</code>, <code>useRef</code>.</li>
 </ol>
-
-<hr>
-
-<h2>Vue d'Ensemble 🗺️</h2>
+<hr />
+<h2 id="vuedensemble">Vue d'Ensemble 🗺️</h2>
 <p>Voici comment les composants interagissent entre eux :</p>
+<pre><code class="mermaid language-mermaid">graph TD
+    A[AuthProvider] --&gt;|Fournit Contexte| B[App]
+    B --&gt; C[Routes]
+    C --&gt; D[Public Routes]
+    C --&gt; E[Protected Routes]
+    E --&gt;|Vérifie Auth| F[ProtectedRoute]
+    F --&gt;|Si Admin| G[Admin Pages]
+    F --&gt;|Si Non Connecté| H[Login Page]
+    G --&gt; I[Project Details]
 
-<div class="mermaid">
-graph TD
-    A[AuthProvider] -->|Fournit Contexte| B[App]
-    B --> C[Routes]
-    C --> D[Public Routes]
-    C --> E[Protected Routes]
-    E -->|Vérifie Auth| F[ProtectedRoute]
-    F -->|Si Admin| G[Admin Pages]
-    F -->|Si Non Connecté| H[Login Page]
-    G --> I[Project Details]
-    
     subgraph Data Flow
-    J[useAuth] -->|Consomme| A
-    G -->|Utilise| J
-    H -->|Modifie| J
+    J[useAuth] --&gt;|Consomme| A
+    G --&gt;|Utilise| J
+    H --&gt;|Modifie| J
     end
-</div>
-
-<hr>
-
-<h2>Partie 1 : Authentification Simplifiée (<code>src/context/AuthContext.tsx</code>)</h2>
-
+</code></pre>
+<hr />
+<h2 id="partie1authentificationsimplifiesrccontextauthcontexttsx">Partie 1 : Authentification Simplifiée (<code>src/context/AuthContext.tsx</code>)</h2>
 <p>Nous utilisons un seul fichier pour tout gérer.</p>
-
-<pre><code class="language-tsx">
-import { createContext, useState, useEffect, useContext } from 'react';
+<pre><code class="tsx language-tsx">import { createContext, useState, useEffect, useContext } from 'react';
 import type { ReactNode } from 'react';
 
 // ... (Code identique au précédent pour AuthContext)
 </code></pre>
-
-<hr>
-
-<h2>Partie 2 : Concepts Avancés 🚀</h2>
-
-<h3>1. Routes Dynamiques avec <code>useParams</code></h3>
+<p><em>(Voir votre code source pour l'implémentation complète)</em></p>
+<hr />
+<h2 id="partie2conceptsavancs">Partie 2 : Concepts Avancés 🚀</h2>
+<h3 id="1routesdynamiquesavecuseparams">1. Routes Dynamiques avec <code>useParams</code></h3>
 <p>Pour créer une page de détail (ex: <code>/admin/projects/123</code>), on utilise <code>useParams</code>.</p>
-
-<p><strong>Configuration Route (<code>App.tsx</code>) :</strong></p>
-<pre><code class="language-tsx">&lt;Route path="projects/:id" element={&lt;AdminProjectDetails /&gt;} /&gt;</code></pre>
-
-<p><strong>Récupération ID (<code>AdminProjectDetails.tsx</code>) :</strong></p>
-<pre><code class="language-tsx">
-import { useParams } from 'react-router-dom';
+<p><strong>Configuration Route (<code>App.tsx</code>)</strong> :</p>
+<pre><code class="tsx language-tsx">&lt;Route path="projects/:id" element={&lt;AdminProjectDetails /&gt;} /&gt;
+</code></pre>
+<p><strong>Récupération ID (<code>AdminProjectDetails.tsx</code>)</strong> :</p>
+<pre><code class="tsx language-tsx">import { useParams } from 'react-router-dom';
 
 export default function AdminProjectDetails() {
   const { id } = useParams(); // id vaudra "123"
   // ...
 }
 </code></pre>
-
-<h3>2. Le Cycle de Vie avec <code>useEffect</code></h3>
+<h3 id="2lecycledevieavecuseeffect">2. Le Cycle de Vie avec <code>useEffect</code></h3>
 <p>Ce hook permet d'effectuer des actions à des moments précis.</p>
-
 <ul>
-    <li><strong>Au montage seulement</strong> : <code>useEffect(..., [])</code></li>
-    <li><strong>Quand une variable change</strong> : <code>useEffect(..., [id])</code></li>
-    <li><strong>Nettoyage</strong> : <code>return () => { ... }</code></li>
+<li><strong>Au montage seulement</strong> (Comme <code>componentDidMount</code>) :</li>
 </ul>
-
-<h3>3. Références avec <code>useRef</code></h3>
-<p><code>useRef</code> a deux utilités principales :</p>
-<ol>
-    <li><strong>Accéder au DOM</strong> (ex: focus).</li>
-    <li><strong>Stocker une valeur mutable</strong> sans re-render.</li>
-</ol>
-
-<pre><code class="language-tsx">
-const inputRef = useRef&lt;HTMLInputElement&gt;(null);
-
-// Mettre le focus au chargement
-useEffect(() => {
-   if(inputRef.current) inputRef.current.focus();
+<pre><code class="tsx language-tsx">useEffect(() =&gt; {
+  console.log("Composant affiché !");
+  fetchData();
+}, []); // Tableau vide
+</code></pre>
+<ul>
+<li><strong>Quand une variable change</strong> :</li>
+</ul>
+<pre><code class="tsx language-tsx">useEffect(() =&gt; {
+  console.log("ID a changé :", id);
+}, [id]); // Se relance si 'id' change
+</code></pre>
+<ul>
+<li><strong>À chaque rendu</strong> (Attention aux performances !) :</li>
+</ul>
+<pre><code class="tsx language-tsx">useEffect(() =&gt; {
+  console.log("Rendu !");
+}); // Pas de tableau
+</code></pre>
+<ul>
+<li><strong>Nettoyage</strong> (Comme <code>componentWillUnmount</code>) :</li>
+</ul>
+<pre><code class="tsx language-tsx">useEffect(() =&gt; {
+  return () =&gt; {
+    console.log("Composant détruit");
+    // Annuler des abonnements ici
+  };
 }, []);
 </code></pre>
+<h3 id="3rfrencesavecuseref">3. Références avec <code>useRef</code></h3>
+<p><code>useRef</code> a deux utilités principales :</p>
+<ol>
+<li><strong>Accéder au DOM</strong> (ex: mettre le focus sur un input).</li>
+<li><strong>Stocker une valeur mutable</strong> qui ne provoque pas de re-render quand on la change.</li>
+</ol>
+<pre><code class="tsx language-tsx">const inputRef = useRef&lt;HTMLInputElement&gt;(null);
 
-<hr>
+// Mettre le focus au chargement
+useEffect(() =&gt; {
+   if(inputRef.current) inputRef.current.focus();
+}, []);
 
-<h2>Quiz de Validation 🧠</h2>
+return &lt;input ref={inputRef} /&gt;;
+</code></pre>
+<hr />
+<h2 id="partie3architectureapibonnespratiques">Partie 3 : Architecture API &amp; Bonnes Pratiques 🛠️</h2>
+<p>Pour garder le code propre, il est crucial de ne pas faire les appels <code>fetch</code> directement dans les composants.</p>
+<h3 id="architecturerecommande">Architecture Recommandée</h3>
+<p>Nous avons créé un guide détaillé sur l'architecture API ici : <a href="./API_BEST_PRACTICES.md">API_BEST_PRACTICES.md</a>.</p>
+<p><strong>En résumé :</strong></p>
+<ol>
+<li><strong>Services</strong> : Tous les appels API sont dans <code>src/services/</code>.</li>
+<li><strong>Types</strong> : Les interfaces TypeScript sont dans <code>src/types/</code>.</li>
+<li><strong>Token</strong> : Le token est géré automatiquement par le wrapper <code>api.ts</code>.</li>
+<li><strong>Gestion d'erreur</strong> : Centralisée pour éviter de répéter les <code>try/catch</code>.</li>
+</ol>
+<p>Exemple d'utilisation avec le nouveau service :</p>
+<pre><code class="tsx language-tsx">import { ProjectService } from '../services/project.service';
 
-<div class="quiz">
-    <p><strong>Q1. Quelle méthode de <code>React Router</code> permet de récupérer <code>:id</code> dans l'URL ?</strong><br>
-    A) <code>useRoute</code><br>
-    B) <code>useParams</code><br>
-    C) <code>useHistory</code></p>
+// Dans votre composant
+useEffect(() =&gt; {
+  ProjectService.getAll().then(data =&gt; setProjects(data));
+}, []);
+</code></pre>
+<hr />
+<hr />
+<h2 id="partie4comprendrelejwtjsonwebtoken">Partie 4 : Comprendre le JWT (JSON Web Token) 🔑</h2>
+<p>Le <strong>JWT</strong> est un standard pour échanger des informations de manière sécurisée.
+Il est composé de 3 parties séparées par des points (<code>.</code>) :</p>
+<ol>
+<li><strong>Header</strong> : L'algo de cryptage (ex: HS256).</li>
+<li><strong>Payload</strong> : Les données de l'utilisateur (id, email, expiration).</li>
+<li><strong>Signature</strong> : Assure que le token n'a pas été modifié.</li>
+</ol>
+<p><strong>Flux d'authentification :</strong></p>
+<ol>
+<li>L'utilisateur envoie email/password au serveur.</li>
+<li>Le serveur vérifie et renvoie un <strong>Token</strong> signé.</li>
+<li>Le client stocke ce Token (localStorage ou Cookie).</li>
+<li>Pour chaque requête suivante, le client envoie le Token dans le header <code>Authorization</code>.</li>
+</ol>
+<h3 id="dcodagectclientsrcutilsjwtts">Décodage Côté Client (<code>src/utils/jwt.ts</code>)</h3>
+<p>Nous ne pouvons pas vérifier la signature (seul le serveur a la clé secrète), mais nous pouvons <strong>décoder</strong> le payload pour afficher le nom ou vérifier l'expiration.</p>
+<pre><code class="typescript language-typescript">// Exemple de fonction de décodage simple (base64)
+export function decodeJWT(token) {
+  const payload = token.split('.')[1];
+  return JSON.parse(atob(payload));
+}
+</code></pre>
+<hr />
+<h2 id="partie5webservicesetcrud">Partie 5 : WebServices et CRUD 📡</h2>
+<p>Le <strong>CRUD</strong> (Create, Read, Update, Delete) est la base des applications web.</p>
+<h3 id="architectureservice">Architecture Service</h3>
+<p>Pour éviter de dupliquer le code <code>fetch</code>, on utilise des <strong>Services</strong>.</p>
+<p><strong>Exemple : <code>ProjectService</code></strong></p>
+<ul>
+<li><strong>GET</strong> (Read) : <code>client.get('/projects')</code></li>
+<li><strong>POST</strong> (Create) : <code>client.post('/projects', data)</code></li>
+<li><strong>PUT</strong> (Update) : <code>client.put('/projects/${id}', data)</code></li>
+<li><strong>DELETE</strong> (Delete) : <code>client.delete('/projects/${id}')</code></li>
+</ul>
+<h3 id="limportanceducontext">L'importance du Context</h3>
+<p>Le <code>Context</code> React sert à partager des données "globales" (Auth, Thème, Langue) sans passer les props manuellement à chaque étage ("Prop Drilling").</p>
+<hr />
+<h2 id="partie6lehookuseeffectendtail">Partie 6 : Le Hook useEffect en Détail 🎣</h2>
+<p><code>useEffect</code> synchronise votre composant avec un système extérieur (API, DOM, Timer).</p>
+<h3 id="les4mouvementsduuseeffect">Les 4 Mouvements du useEffect</h3>
+<ol>
+<li><strong>Mounting (Démarrage)</strong> : Le tableau de dépendances est vide <code>[]</code>.
+<em>Exemple : Charger des données au lancement.</em></li>
+<li><strong>Updating (Mise à jour)</strong> : Le tableau contient des variables <code>[id, user]</code>.
+<em>Exemple : Recharger les données quand l'ID change.</em></li>
+<li><strong>Unmounting (Nettoyage)</strong> : La fonction retourne une autre fonction.
+<em>Exemple : Couper une connexion WebSocket.</em></li>
+<li><strong>No Dependency (Danger)</strong> : Pas de tableau.
+<em>S'exécute à chaque rendu. À éviter sauf cas rares.</em></li>
+</ol>
+<pre><code class="typescript language-typescript">useEffect(() =&gt; {
+  // 1. Code exécuté au montage ou update
+  const timer = setInterval(() =&gt; console.log('Tic'), 1000);
 
-    <p><strong>Q2. Que se passe-t-il si le tableau de dépendances de <code>useEffect</code> est vide <code>[]</code> ?</strong><br>
-    A) L'effet tourne à chaque seconde<br>
-    B) L'effet ne tourne jamais<br>
-    C) L'effet tourne une seule fois au montage</p>
-
-    <p><strong>Q3. <code>useRef</code> provoque-t-il un re-rendu du composant quand sa valeur change ?</strong><br>
-    A) Oui<br>
-    B) Non</p>
-    
-    <p><strong>Q4. Dans quel fichier avons-nous centralisé la logique d'auth ?</strong><br>
-    A) <code>src/hooks/useAuth.ts</code><br>
-    B) <code>src/context/AuthContext.tsx</code><br>
-    C) <code>src/App.js</code></p>
-
-    <p><strong>Q5. Comment protéger une route ?</strong><br>
-    A) Avec un mot de passe<br>
-    B) En l'enveloppant dans un composant (ex: <code>ProtectedRoute</code>) qui vérifie l'auth<br>
-    C) En supprimant le fichier</p>
-
-    <div class="answer">
-        <hr>
-        <strong>Réponses :</strong><br>
-        1: B, 2: C, 3: B, 4: B, 5: B
-    </div>
-</div>
-
+  // 2. Fonction de nettoyage (exécutée avant le prochain effet ou au démontage)
+  return () =&gt; {
+    clearInterval(timer); // Important pour éviter les fuites de mémoire !
+  };
+}, []); // Tableau de dépendances
+</code></pre>
+<hr />
+<h2 id="quizdevalidation">Quiz de Validation 🧠</h2>
+<p><strong>Q1. Quelle partie du JWT contient les données utilisateur ?</strong>
+A) Header
+B) Payload
+C) Signature</p>
+<p><strong>Q2. Que signifie CRUD ?</strong>
+A) Create, Read, Update, Delete
+B) Code, Run, Unit, Debug
+C) Connect, Request, User, Database</p>
+<p><strong>Q3. Pourquoi utiliser un Service pour les appels API ?</strong>
+A) Pour rendre le code plus lent
+B) Pour centraliser la logique et réutiliser le code
+C) C'est obligatoire par React</p>
+<p><strong>Q4. Si je veux exécuter un effet uniquement quand la variable <code>userId</code> change, que dois-je mettre dans le tableau de dépendances ?</strong>
+A) <code>[]</code>
+B) <code>[userId]</code>
+C) Rien du tout</p>
+<p><strong>Q5. Comment envoyer le token au serveur de manière sécurisée ?</strong>
+A) Dans l'URL
+B) Dans le header <code>Authorization: Bearer &lt;token&gt;</code>
+C) Dans le body de chaque requête</p>
+<p><strong>Q6. Que se passe-t-il si on oublie la fonction de nettoyage dans un <code>useEffect</code> qui crée un <code>setInterval</code> ?</strong>
+A) Rien de grave
+B) Le timer continue de tourner indéfiniment (fuite de mémoire)
+C) React plante immédiatement</p>
+<p><strong>Q7. Quelle méthode de <code>React Router</code> permet de récupérer <code>:id</code> dans l'URL ?</strong>
+A) <code>useRoute</code>
+B) <code>useParams</code>
+C) <code>useHistory</code></p>
+<p><strong>Q8. <code>useRef</code> provoque-t-il un re-rendu du composant quand sa valeur change ?</strong>
+A) Oui
+B) Non</p>
+<p><strong>Q9. Dans quel fichier avons-nous centralisé la logique d'auth ?</strong>
+A) <code>src/hooks/useAuth.ts</code>
+B) <code>src/context/AuthContext.tsx</code>
+C) <code>src/App.js</code></p>
+<p><strong>Q10. Que faut-il faire si le token est expiré (401) ?</strong>
+A) Réessayer en boucle
+B) Déconnecter l'utilisateur et le rediriger vers le Login
+C) Ignorer l'erreur</p>
+<hr />
+<p><em>Réponses : 1B, 2A, 3B, 4B, 5B, 6B, 7B, 8B, 9B, 10B</em></p>
 <script>
     mermaid.initialize({ startOnLoad: true });
 </script>
-
 </body>
 </html>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-const API_URL = 'https://my-porfollio-backend.onrender.com/api';
+import { ProjectService } from '../../services/project.service';
 
 export default function AdminProjectDetails() {
     const { id } = useParams(); // 1. useParams : Récupérer l'ID depuis l'URL
@@ -43,21 +43,10 @@ export default function AdminProjectDetails() {
     async function fetchProjectDetails(projectId: string) {
         setLoading(true);
         try {
-            // Simulation d'appel API (remplacer par vrai fetch)
-            // const response = await fetch(`${API_URL}/projects/${projectId}`);
-            // const data = await response.json();
-
-            // Mock data pour l'exemple
-            setTimeout(() => {
-                setProject({
-                    id: projectId,
-                    title: `Projet ${projectId}`,
-                    description: "Description détaillée du projet avec gestion des états complexes.",
-                    technologies: ["React", "TypeScript", "Tailwind"]
-                });
-                setLoading(false);
-            }, 500);
-
+            // Appel API réel via le service
+            const data = await ProjectService.getOne(projectId);
+            setProject(data.project);
+            setLoading(false);
         } catch (error) {
             console.error(error);
             setLoading(false);
