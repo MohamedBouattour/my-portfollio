@@ -83,18 +83,20 @@ L'architecture de routes est la colonne vertébrale de votre application. Nous u
     - A) Va à la page d'accueil
     - B) Retourne à la page précédente (Historique)
     - C) Erreur
-8.  **Dans `<Route path="admin" element={<Layout />} >`, le chemin des enfants est... ?**
-    - A) Absolu (doit commencer par /)
-    - B) Relatif à "admin"
-9.  **Peut-on avoir plusieurs `<Routes>` dans l'app ?**
-    - A) Oui
-    - B) Non, un seul autorisé
+8.  **Quel est l'avantage principal des Routes Imbriquées (Nested Routes) ?**
+    - A) Partager un Layout (Header, Sidebar) entre plusieurs pages enfants
+    - B) Rendre le site plus rapide
+    - C) C'est obligatoire par React
+9.  **À quoi sert une route avec la propriété `index` ?**
+    - A) À créer un index de base de données
+    - B) À définir le composant par défaut d'une route parente
+    - C) À rien
 10. **Laquelle est une redirection automatique ?**
     - A) `<Redirect />`
     - B) `<Navigate to="..." />`
     - C) `<Go to="..." />`
 
-*(Réponses : 1B, 2B, 3B, 4C, 5B, 6A, 7B, 8B, 9A, 10B)*
+*(Réponses : 1B, 2B, 3B, 4C, 5B, 6A, 7B, 8A, 9B, 10B)*
 
 ---
 
@@ -145,25 +147,27 @@ Le Contexte agit comme une téléportation de données. (Voir schéma ci-dessus,
 5.  **Peut-on avoir plusieurs Contextes ?**
     - A) Non, un seul global
     - B) Oui (Auth, Theme, Language...)
-6.  **Que retourne `useContext(MyContext)` ?**
-    - A) La prop `value` passée au Provider le plus proche
-    - B) L'objet Contexte entier
-    - C) Undefined
+6.  **Quelle est la fonction principale de `useContext` ?**
+    - A) Créer un nouveau contexte
+    - B) Lire la valeur actuelle du contexte
+    - C) Modifier le contexte
 7.  **Pourquoi faire un Hook `useAuth` ?**
     - A) Pour ne pas importer `useContext` et `AuthContext` partout
     - B) Pour ajouter une validation (Throw error si hors provider)
     - C) Les deux
-8.  **Context remplace-t-il Redux/Zustand ?**
-    - A) Oui, totalement
-    - B) Non, Context est pour les états globaux simples, Redux pour les états complexes et fréquents
-9.  **La valeur par défaut du Context sert quand... ?**
-    - A) Le Provider est présent
-    - B) On essaie de consommer le contexte SANS Provider parent
+8.  **Quel type de données est idéal pour le Context API ?**
+    - A) Des données locales spécifiques à un seul composant
+    - B) Des données globales (Thème, Utilisateur, Langue)
+    - C) Des données de haute fréquence (Animation 60fps)
+9.  **Quels composants peuvent consommer le Contexte ?**
+    - A) N'importe quel composant de l'application
+    - B) Uniquement les enfants (descendants) du Provider
+    - C) Uniquement le composant qui a créé le contexte
 10. **Peut-on passer des fonctions dans le Context ?**
     - A) Oui (ex: login(), logout())
     - B) Non, que des objets JSON
 
-*(Réponses : 1B, 2A, 3B, 4B, 5B, 6A, 7C, 8B, 9B, 10A)*
+*(Réponses : 1B, 2A, 3B, 4B, 5B, 6B, 7C, 8B, 9B, 10A)*
 
 ---
 

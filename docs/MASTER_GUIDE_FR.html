@@ -122,18 +122,20 @@
 <li>A) Va à la page d'accueil</li>
 <li>B) Retourne à la page précédente (Historique)</li>
 <li>C) Erreur</li></ul></li>
-<li><strong>Dans <code>&lt;Route path="admin" element={&lt;Layout /&gt;} &gt;</code>, le chemin des enfants est… ?</strong><ul>
-<li>A) Absolu (doit commencer par /)</li>
-<li>B) Relatif à "admin"</li></ul></li>
-<li><strong>Peut-on avoir plusieurs <code>&lt;Routes&gt;</code> dans l'app ?</strong><ul>
-<li>A) Oui</li>
-<li>B) Non, un seul autorisé</li></ul></li>
+<li><strong>Quel est l'avantage principal des Routes Imbriquées (Nested Routes) ?</strong><ul>
+<li>A) Partager un Layout (Header, Sidebar) entre plusieurs pages enfants</li>
+<li>B) Rendre le site plus rapide</li>
+<li>C) C'est obligatoire par React</li></ul></li>
+<li><strong>À quoi sert une route avec la propriété <code>index</code> ?</strong><ul>
+<li>A) À créer un index de base de données</li>
+<li>B) À définir le composant par défaut d'une route parente</li>
+<li>C) À rien</li></ul></li>
 <li><strong>Laquelle est une redirection automatique ?</strong><ul>
 <li>A) <code>&lt;Redirect /&gt;</code></li>
 <li>B) <code>&lt;Navigate to="..." /&gt;</code></li>
 <li>C) <code>&lt;Go to="..." /&gt;</code></li></ul></li>
 </ol>
-<p><em>(Réponses : 1B, 2B, 3B, 4C, 5B, 6A, 7B, 8B, 9A, 10B)</em></p>
+<p><em>(Réponses : 1B, 2B, 3B, 4C, 5B, 6A, 7B, 8A, 9B, 10B)</em></p>
 <hr />
 <h2 id="2lagestiondtatglobalecontextapi">2. La Gestion d'État Globale (Context API) 🧠</h2>
 <h3 id="questcequeltatglobal">Qu'est-ce que l'État Global ?</h3>
@@ -172,25 +174,27 @@
 <li><strong>Peut-on avoir plusieurs Contextes ?</strong><ul>
 <li>A) Non, un seul global</li>
 <li>B) Oui (Auth, Theme, Language…)</li></ul></li>
-<li><strong>Que retourne <code>useContext(MyContext)</code> ?</strong><ul>
-<li>A) La prop <code>value</code> passée au Provider le plus proche</li>
-<li>B) L'objet Contexte entier</li>
-<li>C) Undefined</li></ul></li>
+<li><strong>Quelle est la fonction principale de <code>useContext</code> ?</strong><ul>
+<li>A) Créer un nouveau contexte</li>
+<li>B) Lire la valeur actuelle du contexte</li>
+<li>C) Modifier le contexte</li></ul></li>
 <li><strong>Pourquoi faire un Hook <code>useAuth</code> ?</strong><ul>
 <li>A) Pour ne pas importer <code>useContext</code> et <code>AuthContext</code> partout</li>
 <li>B) Pour ajouter une validation (Throw error si hors provider)</li>
 <li>C) Les deux</li></ul></li>
-<li><strong>Context remplace-t-il Redux/Zustand ?</strong><ul>
-<li>A) Oui, totalement</li>
-<li>B) Non, Context est pour les états globaux simples, Redux pour les états complexes et fréquents</li></ul></li>
-<li><strong>La valeur par défaut du Context sert quand… ?</strong><ul>
-<li>A) Le Provider est présent</li>
-<li>B) On essaie de consommer le contexte SANS Provider parent</li></ul></li>
+<li><strong>Quel type de données est idéal pour le Context API ?</strong><ul>
+<li>A) Des données locales spécifiques à un seul composant</li>
+<li>B) Des données globales (Thème, Utilisateur, Langue)</li>
+<li>C) Des données de haute fréquence (Animation 60fps)</li></ul></li>
+<li><strong>Quels composants peuvent consommer le Contexte ?</strong><ul>
+<li>A) N'importe quel composant de l'application</li>
+<li>B) Uniquement les enfants (descendants) du Provider</li>
+<li>C) Uniquement le composant qui a créé le contexte</li></ul></li>
 <li><strong>Peut-on passer des fonctions dans le Context ?</strong><ul>
 <li>A) Oui (ex: login(), logout())</li>
 <li>B) Non, que des objets JSON</li></ul></li>
 </ol>
-<p><em>(Réponses : 1B, 2A, 3B, 4B, 5B, 6A, 7C, 8B, 9B, 10A)</em></p>
+<p><em>(Réponses : 1B, 2A, 3B, 4B, 5B, 6B, 7C, 8B, 9B, 10A)</em></p>
 <hr />
 <h2 id="3communicationapiarchitectureservice">3. Communication API &amp; Architecture Service 📡</h2>
 <p>Une application frontend moderne n'est qu'une coquille vide sans données. Elle doit dialoguer en permanence avec un Backend via une API REST.</p>
